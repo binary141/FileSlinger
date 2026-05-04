@@ -15,6 +15,6 @@ func Start(cfg Config) error {
 	mux.HandleFunc("/upload", uploadHandler(cfg.Dir))
 
 	addr := fmt.Sprintf(":%d", cfg.Port)
-	fmt.Printf("Listening on %s, saving files to %s\n", addr, cfg.Dir)
+	fmt.Printf("Listening on http://localhost:%d/upload, saving files to %s\n", cfg.Port, cfg.Dir)
 	return http.ListenAndServe(addr, logging(mux))
 }
