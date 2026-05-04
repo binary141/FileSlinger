@@ -11,6 +11,14 @@ import (
 
 const maxUploadSize = 10 << 30 // 10 GiB
 
+func pingHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func uploadHandler(dir string, maxFiles int, received *atomic.Int32, shutdown func()) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {

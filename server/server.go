@@ -88,6 +88,7 @@ func Start(cfg Config) error {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/upload", uploadHandler(cfg.Dir, cfg.MaxFiles, &received, shutdown))
+	mux.HandleFunc("/ping", pingHandler)
 	srv.Handler = logging(tokenAuth(cfg.Token, mux))
 
 	limitMsg := "unlimited"
