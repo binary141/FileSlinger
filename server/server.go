@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 	"sync/atomic"
+
+	"github.com/mdp/qrterminal/v3"
 )
 
 const tokenChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -92,8 +94,13 @@ func Start(cfg Config) error {
 	if cfg.MaxFiles > 0 {
 		limitMsg = fmt.Sprintf("limit %d", cfg.MaxFiles)
 	}
-	fmt.Printf("Listening on http://%s:%d/upload, saving files to %s (%s)\n", privateIP(), cfg.Port, cfg.Dir, limitMsg)
-	fmt.Printf("Token: %s\n", cfg.Token)
+	ip := privateIP()
+	url := fmt.Sprintf("http://%s:%d/upload?token=%s", ip, cfg.Port, cfg.Token)
+
+	qrterminal.GenerateHalfBlock(url, qrterminal.M, os.Stdout)
+
+	fmt.Printf("URL:   %s\n", url)
+	fmt.Printf("Dir:   %s (%s)\n", cfg.Dir, limitMsg)
 
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 		return err
