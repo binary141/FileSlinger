@@ -18,5 +18,5 @@ var serveCmd = &cobra.Command{
 
 func init() {
 	serveCmd.Flags().IntP("port", "p", 8080, "Port to listen on")
-	serveCmd.Flags().StringP("dir", "d", ".", "Directory to save received files")
+	serveCmd.Flags().StringP("dir", "d", "uploads", "Directory to save received files")
 }
