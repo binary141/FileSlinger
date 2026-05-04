@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	"fileSlinger/client"
 
 	"github.com/spf13/cobra"
 )
@@ -13,8 +13,7 @@ var sendCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		host, _ := cmd.Flags().GetString("host")
 		port, _ := cmd.Flags().GetInt("port")
-		fmt.Printf("send: host=%s port=%d files=%v\n", host, port, args)
-		return nil
+		return client.SendFiles(host, port, args)
 	},
 }
 
