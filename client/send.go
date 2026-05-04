@@ -10,18 +10,18 @@ import (
 	"path/filepath"
 )
 
-func SendFiles(host string, port int, paths []string) error {
+func SendFiles(host string, port int, token string, paths []string) error {
 	url := fmt.Sprintf("http://%s:%d/upload", host, port)
 
 	for _, path := range paths {
-		if err := sendFile(url, path); err != nil {
+		if err := sendFile(url, token, path); err != nil {
 			return fmt.Errorf("%s: %w", filepath.Base(path), err)
 		}
 	}
 	return nil
 }
 
-func sendFile(url, path string) error {
+func sendFile(url, token, path string) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return err
@@ -46,7 +46,14 @@ func sendFile(url, path string) error {
 	}
 	mw.Close()
 
-	resp, err := http.Post(url, mw.FormDataContentType(), &buf)
+	req, err := http.NewRequest(http.MethodPost, url, &buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	req.Header.Set("X-Token", token)
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}

@@ -13,12 +13,15 @@ var sendCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		host, _ := cmd.Flags().GetString("host")
 		port, _ := cmd.Flags().GetInt("port")
-		return client.SendFiles(host, port, args)
+		token, _ := cmd.Flags().GetString("token")
+		return client.SendFiles(host, port, token, args)
 	},
 }
 
 func init() {
 	sendCmd.Flags().StringP("host", "H", "", "Server host or IP address (required)")
 	sendCmd.Flags().IntP("port", "p", 8080, "Server port")
+	sendCmd.Flags().StringP("token", "t", "", "Auth token (required)")
 	sendCmd.MarkFlagRequired("host")
+	sendCmd.MarkFlagRequired("token")
 }
