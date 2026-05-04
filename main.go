@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "fileSlinger/cmd"
 
 func main() {
-	fmt.Println("HELLO")
+	cmd.Execute()
 }
