@@ -40,7 +40,7 @@ func uploadHandler(dir string) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "received %d file(s)\n", len(files))
+		_, _ = fmt.Fprintf(w, "received %d file(s)\n", len(files))
 	}
 }
 
@@ -55,13 +55,17 @@ func saveFile(dir, filename string, open func() (io.ReadCloser, error)) error {
 	if err != nil {
 		return err
 	}
-	defer src.Close()
+	defer func() {
+		_ = src.Close()
+	}()
 
 	dst, err := os.Create(filepath.Join(dir, safe))
 	if err != nil {
 		return err
 	}
-	defer dst.Close()
+	defer func() {
+		_ = dst.Close()
+	}()
 
 	_, err = io.Copy(dst, src)
 	return err
