@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
+	"net"
 	"net/http"
 	"os"
 	"sync/atomic"
@@ -18,6 +19,36 @@ type Config struct {
 	Dir      string
 	MaxFiles int    // 0 = unlimited
 	Token    string // auto-generated if empty
+}
+
+func privateIP() string {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return "localhost"
+	}
+	for _, iface := range ifaces {
+		if iface.Flags&net.FlagUp == 0 || iface.Flags&net.FlagLoopback != 0 {
+			continue
+		}
+		addrs, err := iface.Addrs()
+		if err != nil {
+			continue
+		}
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+			if ip == nil || ip.IsLoopback() || ip.To4() == nil {
+				continue
+			}
+			return ip.String()
+		}
+	}
+	return "localhost"
 }
 
 func generateToken() (string, error) {
@@ -61,7 +92,7 @@ func Start(cfg Config) error {
 	if cfg.MaxFiles > 0 {
 		limitMsg = fmt.Sprintf("limit %d", cfg.MaxFiles)
 	}
-	fmt.Printf("Listening on http://localhost:%d/upload, saving files to %s (%s)\n", cfg.Port, cfg.Dir, limitMsg)
+	fmt.Printf("Listening on http://%s:%d/upload, saving files to %s (%s)\n", privateIP(), cfg.Port, cfg.Dir, limitMsg)
 	fmt.Printf("Token: %s\n", cfg.Token)
 
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
