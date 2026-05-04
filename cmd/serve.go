@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fileSlinger/config"
 	"fileSlinger/server"
 
 	"github.com/spf13/cobra"
@@ -14,6 +15,25 @@ var serveCmd = &cobra.Command{
 		dir, _ := cmd.Flags().GetString("dir")
 		maxFiles, _ := cmd.Flags().GetInt("max-files")
 		token, _ := cmd.Flags().GetString("token")
+
+		cfg, err := config.Load()
+		if err != nil {
+			return err
+		}
+
+		if !cmd.Flags().Changed("port") && cfg.Port != nil {
+			port = *cfg.Port
+		}
+		if !cmd.Flags().Changed("dir") && cfg.Dir != nil {
+			dir = *cfg.Dir
+		}
+		if !cmd.Flags().Changed("max-files") && cfg.MaxFiles != nil {
+			maxFiles = *cfg.MaxFiles
+		}
+		if !cmd.Flags().Changed("token") && cfg.Token != nil {
+			token = *cfg.Token
+		}
+
 		return server.Start(server.Config{Port: port, Dir: dir, MaxFiles: maxFiles, Token: token})
 	},
 }
