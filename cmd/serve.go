@@ -3,6 +3,8 @@ package cmd
 import (
 	"fileSlinger/config"
 	"fileSlinger/server"
+	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -32,6 +34,14 @@ var serveCmd = &cobra.Command{
 		}
 		if !cmd.Flags().Changed("token") && cfg.Token != nil {
 			token = *cfg.Token
+		}
+
+		if strings.HasPrefix(dir, "~/") {
+			home, err := os.UserHomeDir()
+			if err != nil {
+				return err
+			}
+			dir = home + dir[1:]
 		}
 
 		return server.Start(server.Config{Port: port, Dir: dir, MaxFiles: maxFiles, Token: token})
