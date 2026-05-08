@@ -1,4 +1,4 @@
-# fileSlinger
+# FileSlinger
 
 Sling files between machines over HTTP. Run a receiver on one machine, scan the QR code on another, and drop files straight into your chosen directory — no accounts, no cloud, no fuss.
 
