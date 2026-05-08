@@ -13,14 +13,14 @@ Sling files between machines over HTTP. Run a receiver on one machine, scan the 
 ## Installation
 
 ```sh
-go install fileSlinger@latest
+go install github.com/binary141/fileslinger@latest
 ```
 
 Or build from source:
 
 ```sh
-git clone <repo>
-cd fileSlinger
+git clone git@github.com:binary141/FileSlinger.git
+cd FileSlinger
 go build -o fileslinger .
 ```
 
