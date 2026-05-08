@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"fileSlinger/config"
-	"fileSlinger/server"
 	"os"
 	"strings"
+
+	"github.com/binary141/FileSlinger/config"
+	"github.com/binary141/FileSlinger/server"
 
 	"github.com/spf13/cobra"
 )

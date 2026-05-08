@@ -1,6 +1,6 @@
 package main
 
-import "fileSlinger/cmd"
+import "github.com/binary141/FileSlinger/cmd"
 
 func main() {
 	cmd.Execute()
