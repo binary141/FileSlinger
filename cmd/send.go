@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fileSlinger/client"
+	"fmt"
 
 	"github.com/spf13/cobra"
 )
@@ -14,14 +15,28 @@ var sendCmd = &cobra.Command{
 		host, _ := cmd.Flags().GetString("host")
 		port, _ := cmd.Flags().GetInt("port")
 		token, _ := cmd.Flags().GetString("token")
+		relay, _ := cmd.Flags().GetString("relay")
+
+		if relay != "" {
+			if token == "" {
+				return fmt.Errorf("--token is required")
+			}
+			return client.SendFilesRelay(relay, token, args)
+		}
+
+		if host == "" {
+			return fmt.Errorf("--host is required (or use --relay for cloud relay mode)")
+		}
+		if token == "" {
+			return fmt.Errorf("--token is required")
+		}
 		return client.SendFiles(host, port, token, args)
 	},
 }
 
 func init() {
-	sendCmd.Flags().StringP("host", "H", "", "Server host or IP address (required)")
+	sendCmd.Flags().StringP("host", "H", "", "Server host or IP address")
 	sendCmd.Flags().IntP("port", "p", 8080, "Server port")
 	sendCmd.Flags().StringP("token", "t", "", "Auth token (required)")
-	sendCmd.MarkFlagRequired("host")
-	sendCmd.MarkFlagRequired("token")
+	sendCmd.Flags().String("relay", "", "Relay server URL (send via cloud relay instead of direct connection)")
 }

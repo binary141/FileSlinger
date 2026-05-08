@@ -17,6 +17,7 @@ var serveCmd = &cobra.Command{
 		dir, _ := cmd.Flags().GetString("dir")
 		maxFiles, _ := cmd.Flags().GetInt("max-files")
 		token, _ := cmd.Flags().GetString("token")
+		relay, _ := cmd.Flags().GetString("relay")
 
 		cfg, err := config.Load()
 		if err != nil {
@@ -35,6 +36,9 @@ var serveCmd = &cobra.Command{
 		if !cmd.Flags().Changed("token") && cfg.Token != nil {
 			token = *cfg.Token
 		}
+		if !cmd.Flags().Changed("relay") && cfg.RelayURL != nil {
+			relay = *cfg.RelayURL
+		}
 
 		if strings.HasPrefix(dir, "~/") {
 			home, err := os.UserHomeDir()
@@ -44,7 +48,11 @@ var serveCmd = &cobra.Command{
 			dir = home + dir[1:]
 		}
 
-		return server.Start(server.Config{Port: port, Dir: dir, MaxFiles: maxFiles, Token: token})
+		serverCfg := server.Config{Port: port, Dir: dir, MaxFiles: maxFiles, Token: token, RelayURL: relay}
+		if relay != "" {
+			return server.StartRelay(serverCfg)
+		}
+		return server.Start(serverCfg)
 	},
 }
 
@@ -53,4 +61,5 @@ func init() {
 	serveCmd.Flags().StringP("dir", "d", "uploads", "Directory to save received files")
 	serveCmd.Flags().IntP("max-files", "n", 0, "Max number of files to receive before shutting down (0 = unlimited)")
 	serveCmd.Flags().StringP("token", "t", "", "Auth token (auto-generated if not set)")
+	serveCmd.Flags().String("relay", "", "Relay server URL (enables cloud relay mode)")
 }

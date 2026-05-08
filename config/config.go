@@ -14,6 +14,7 @@ type File struct {
 	Dir      *string `json:"dir"`
 	MaxFiles *int    `json:"max_files"`
 	Token    *string `json:"token"`
+	RelayURL *string `json:"relay_url"`
 }
 
 func Load() (File, error) {

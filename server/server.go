@@ -21,6 +21,7 @@ type Config struct {
 	Dir      string
 	MaxFiles int    // 0 = unlimited
 	Token    string // auto-generated if empty
+	RelayURL string // non-empty enables relay mode
 }
 
 func privateIP() string {
