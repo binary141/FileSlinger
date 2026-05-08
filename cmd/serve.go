@@ -4,8 +4,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/binary141/FileSlinger/config"
-	"github.com/binary141/FileSlinger/server"
+	"github.com/binary141/fileslinger/config"
+	"github.com/binary141/fileslinger/server"
 
 	"github.com/spf13/cobra"
 )

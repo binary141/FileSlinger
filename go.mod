@@ -1,4 +1,4 @@
-module github.com/binary141/FileSlinger
+module github.com/binary141/fileslinger
 
 go 1.26.2
 

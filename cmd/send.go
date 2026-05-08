@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/binary141/FileSlinger/client"
+	"github.com/binary141/fileslinger/client"
 
 	"github.com/spf13/cobra"
 )
