@@ -26,7 +26,10 @@ func sendFile(url, token, path string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+
+	defer func() {
+		err = f.Close()
+	}()
 
 	info, err := f.Stat()
 	if err != nil {
@@ -44,7 +47,11 @@ func sendFile(url, token, path string) error {
 	if _, err = io.Copy(part, f); err != nil {
 		return err
 	}
-	mw.Close()
+
+	err = mw.Close()
+	if err != nil {
+		return err
+	}
 
 	req, err := http.NewRequest(http.MethodPost, url, &buf)
 	if err != nil {
@@ -57,7 +64,9 @@ func sendFile(url, token, path string) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)

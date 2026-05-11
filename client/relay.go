@@ -28,7 +28,9 @@ func sendFileRelay(uploadURL, path string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 
 	info, err := f.Stat()
 	if err != nil {
@@ -44,13 +46,20 @@ func sendFileRelay(uploadURL, path string) error {
 	if _, err = io.Copy(part, f); err != nil {
 		return err
 	}
-	mw.Close()
+
+	err = mw.Close()
+	if err != nil {
+		return err
+	}
 
 	resp, err := http.Post(uploadURL, mw.FormDataContentType(), &buf)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusNoContent {
 		body, _ := io.ReadAll(resp.Body)

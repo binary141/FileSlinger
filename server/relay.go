@@ -32,10 +32,15 @@ func StartRelay(cfg Config) error {
 	if err != nil {
 		return fmt.Errorf("relay connect: %w", err)
 	}
-	defer conn.Close()
+
+	defer func() {
+		_ = conn.Close()
+	}()
 
 	uploadURL := relayBase + "/upload/" + cfg.Token
+
 	qrterminal.GenerateHalfBlock(uploadURL, qrterminal.M, os.Stdout)
+
 	fmt.Printf("Relay: %s\n", uploadURL)
 	fmt.Printf("Dir:   %s\n", cfg.Dir)
 
