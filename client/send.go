@@ -12,14 +12,43 @@ import (
 
 func SendFiles(uploadURL string, paths []string) error {
 	for _, path := range paths {
-		if err := sendFile(uploadURL, path); err != nil {
-			return fmt.Errorf("%s: %w", filepath.Base(path), err)
+		info, err := os.Stat(path)
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			if err := sendDir(uploadURL, path); err != nil {
+				return err
+			}
+		} else {
+			if err := sendFile(uploadURL, path, filepath.Base(path)); err != nil {
+				return fmt.Errorf("%s: %w", filepath.Base(path), err)
+			}
 		}
 	}
 	return nil
 }
 
-func sendFile(url, path string) error {
+func sendDir(uploadURL, dir string) error {
+	return filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		rel, err := filepath.Rel(dir, path)
+		if err != nil {
+			return err
+		}
+		if err := sendFile(uploadURL, path, rel); err != nil {
+			return fmt.Errorf("%s: %w", rel, err)
+		}
+		return nil
+	})
+}
+
+func sendFile(url, path, name string) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return err
@@ -37,7 +66,11 @@ func sendFile(url, path string) error {
 	var buf bytes.Buffer
 	mw := multipart.NewWriter(&buf)
 
-	part, err := mw.CreateFormFile("file", filepath.Base(path))
+	if err := mw.WriteField("path", name); err != nil {
+		return err
+	}
+
+	part, err := mw.CreateFormFile("file", filepath.Base(name))
 	if err != nil {
 		return err
 	}
@@ -70,6 +103,6 @@ func sendFile(url, path string) error {
 		return fmt.Errorf("server returned %s: %s", resp.Status, bytes.TrimSpace(body))
 	}
 
-	fmt.Printf("  sent: %s (%d bytes)\n", filepath.Base(path), info.Size())
+	fmt.Printf("  sent: %s (%d bytes)\n", name, info.Size())
 	return nil
 }

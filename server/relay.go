@@ -95,14 +95,35 @@ func unpackRelayMessage(data []byte) (string, []byte, error) {
 	boundary := strings.TrimRight(string(data[2:nl]), "\r")
 
 	mr := multipart.NewReader(bytes.NewReader(data), boundary)
-	part, err := mr.NextPart()
-	if err != nil {
-		return "", nil, fmt.Errorf("multipart: %w", err)
+	var filename string
+	var content []byte
+	for {
+		part, err := mr.NextPart()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return "", nil, fmt.Errorf("multipart: %w", err)
+		}
+		switch part.FormName() {
+		case "path":
+			b, err := io.ReadAll(part)
+			if err != nil {
+				return "", nil, err
+			}
+			filename = string(b)
+		case "file":
+			if filename == "" {
+				filename = part.FileName()
+			}
+			content, err = io.ReadAll(part)
+			if err != nil {
+				return "", nil, err
+			}
+		}
 	}
-	filename := part.FileName()
 	if filename == "" {
 		filename = "upload"
 	}
-	content, err := io.ReadAll(part)
-	return filename, content, err
+	return filename, content, nil
 }

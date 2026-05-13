@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync/atomic"
 )
 
@@ -48,7 +49,11 @@ func uploadHandler(dir, token string, maxFiles int, received *atomic.Int32, shut
 		}
 
 		for _, fh := range files {
-			saved, err := saveFile(dir, fh.Filename, func() (io.ReadCloser, error) {
+			filename := fh.Filename
+			if paths := r.MultipartForm.Value["path"]; len(paths) > 0 {
+				filename = paths[0]
+			}
+			saved, err := saveFile(dir, filename, func() (io.ReadCloser, error) {
 				return fh.Open()
 			})
 			if err != nil {
@@ -70,10 +75,13 @@ func uploadHandler(dir, token string, maxFiles int, received *atomic.Int32, shut
 }
 
 func saveFile(dir, filename string, open func() (io.ReadCloser, error)) (string, error) {
-	// Sanitize: strip any directory component from the uploaded filename.
-	safe := filepath.Base(filename)
-	if safe == "." || safe == "/" {
+	safe := filepath.Clean(filepath.FromSlash(filename))
+	if safe == "." || filepath.IsAbs(safe) || safe == ".." || strings.HasPrefix(safe, ".."+string(filepath.Separator)) {
 		return "", fmt.Errorf("invalid filename")
+	}
+
+	if err := os.MkdirAll(filepath.Join(dir, filepath.Dir(safe)), 0755); err != nil {
+		return "", err
 	}
 
 	dest := deduplicateName(dir, safe)
