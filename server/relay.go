@@ -62,11 +62,15 @@ func StartRelay(cfg Config) error {
 			continue
 		}
 
-		saved, err := saveFile(cfg.Dir, filename, func() (io.ReadCloser, error) {
+		saved, skipped, err := saveFile(cfg.Dir, filename, cfg.SkipExisting, func() (io.ReadCloser, error) {
 			return io.NopCloser(bytes.NewReader(content)), nil
 		})
 		if err != nil {
 			fmt.Printf("  error: %v\n", err)
+			continue
+		}
+		if skipped {
+			fmt.Printf("  skipped: %s. Already exists\n", saved)
 			continue
 		}
 		fmt.Printf("  saved: %s (%d bytes)\n", saved, len(content))

@@ -17,11 +17,12 @@ const tokenChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567
 const tokenLen = 5
 
 type Config struct {
-	Port     int
-	Dir      string
-	MaxFiles int    // 0 = unlimited
-	Token    string // auto-generated if empty
-	RelayURL string // non-empty enables relay mode
+	Port         int
+	Dir          string
+	MaxFiles     int    // 0 = unlimited
+	Token        string // auto-generated if empty
+	RelayURL     string // non-empty enables relay mode
+	SkipExisting bool
 }
 
 func privateIP() string {
@@ -88,7 +89,7 @@ func Start(cfg Config) error {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/upload/{token}", uploadHandler(cfg.Dir, cfg.Token, cfg.MaxFiles, &received, shutdown))
+	mux.HandleFunc("/upload/{token}", uploadHandler(cfg.Dir, cfg.Token, cfg.MaxFiles, cfg.SkipExisting, &received, shutdown))
 	mux.HandleFunc("/ping", pingHandler)
 	srv.Handler = logging(mux)
 

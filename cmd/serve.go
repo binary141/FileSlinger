@@ -19,6 +19,7 @@ var serveCmd = &cobra.Command{
 		maxFiles, _ := cmd.Flags().GetInt("max-files")
 		token, _ := cmd.Flags().GetString("token")
 		relay, _ := cmd.Flags().GetString("relay")
+		skipExisting, _ := cmd.Flags().GetBool("skip-existing")
 
 		cfg, err := config.Load()
 		if err != nil {
@@ -49,7 +50,7 @@ var serveCmd = &cobra.Command{
 			dir = home + dir[1:]
 		}
 
-		serverCfg := server.Config{Port: port, Dir: dir, MaxFiles: maxFiles, Token: token, RelayURL: relay}
+		serverCfg := server.Config{Port: port, Dir: dir, MaxFiles: maxFiles, Token: token, RelayURL: relay, SkipExisting: skipExisting}
 		if relay != "" {
 			return server.StartRelay(serverCfg)
 		}
@@ -63,4 +64,5 @@ func init() {
 	serveCmd.Flags().IntP("max-files", "n", 0, "Max number of files to receive before shutting down (0 = unlimited)")
 	serveCmd.Flags().StringP("token", "t", "", "Auth token (auto-generated if not set)")
 	serveCmd.Flags().String("relay", "", "Relay server URL (enables cloud relay mode)")
+	serveCmd.Flags().Bool("skip-existing", false, "Skip files that already exist in the destination")
 }
