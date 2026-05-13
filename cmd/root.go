@@ -7,8 +7,9 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "fileslinger",
-	Short: "Sling files between machines over HTTP",
+	Use:          "fileslinger",
+	Short:        "Sling files between machines over HTTP",
+	SilenceUsage: true,
 }
 
 func Execute() {

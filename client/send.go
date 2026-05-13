@@ -11,17 +11,19 @@ import (
 )
 
 func SendFiles(uploadURL string, paths []string, excludeDirs []string) error {
+	var count int
 	for _, path := range paths {
 		info, err := os.Stat(path)
 		if err != nil {
 			return err
 		}
 		if info.IsDir() {
-			if err := sendDir(uploadURL, path, excludeDirs); err != nil {
+			if err := sendDir(uploadURL, path, excludeDirs, &count); err != nil {
 				return err
 			}
 		} else {
-			if err := sendFile(uploadURL, path, filepath.Base(path)); err != nil {
+			count++
+			if err := sendFile(uploadURL, path, filepath.Base(path), count); err != nil {
 				return fmt.Errorf("%s: %w", filepath.Base(path), err)
 			}
 		}
@@ -29,7 +31,7 @@ func SendFiles(uploadURL string, paths []string, excludeDirs []string) error {
 	return nil
 }
 
-func sendDir(uploadURL, dir string, excludeDirs []string) error {
+func sendDir(uploadURL, dir string, excludeDirs []string, count *int) error {
 	excluded := make(map[string]bool, len(excludeDirs))
 	for _, d := range excludeDirs {
 		excluded[d] = true
@@ -48,14 +50,15 @@ func sendDir(uploadURL, dir string, excludeDirs []string) error {
 		if err != nil {
 			return err
 		}
-		if err := sendFile(uploadURL, path, rel); err != nil {
+		*count++
+		if err := sendFile(uploadURL, path, rel, *count); err != nil {
 			return fmt.Errorf("%s: %w", rel, err)
 		}
 		return nil
 	})
 }
 
-func sendFile(url, path, name string) error {
+func sendFile(url, path, name string, n int) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return err
@@ -110,6 +113,6 @@ func sendFile(url, path, name string) error {
 		return fmt.Errorf("server returned %s: %s", resp.Status, bytes.TrimSpace(body))
 	}
 
-	fmt.Printf("  sent: %s (%d bytes)\n", name, info.Size())
+	fmt.Printf("  #%d: %s (%d bytes)\n", n, name, info.Size())
 	return nil
 }
