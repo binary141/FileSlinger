@@ -45,7 +45,8 @@ var sendCmd = &cobra.Command{
 			}
 			uploadURL = fmt.Sprintf("%s://%s:%d/upload/%s", scheme, host, port, token)
 		}
-		return client.SendFiles(uploadURL, args)
+		excludeDirs, _ := cmd.Flags().GetStringSlice("exclude-dir")
+		return client.SendFiles(uploadURL, args, excludeDirs)
 	},
 }
 
@@ -56,5 +57,6 @@ func init() {
 	sendCmd.Flags().Bool("https", false, "Use HTTPS")
 	sendCmd.Flags().StringP("token", "t", "", "Auth token (required)")
 	sendCmd.Flags().String("relay", "", "Relay server URL (send via cloud relay instead of direct connection)")
+	sendCmd.Flags().StringSlice("exclude-dir", nil, "Directory names to exclude (can be repeated or comma-separated)")
 	sendCmd.MarkFlagsMutuallyExclusive("http", "https")
 }

@@ -10,14 +10,14 @@ import (
 	"path/filepath"
 )
 
-func SendFiles(uploadURL string, paths []string) error {
+func SendFiles(uploadURL string, paths []string, excludeDirs []string) error {
 	for _, path := range paths {
 		info, err := os.Stat(path)
 		if err != nil {
 			return err
 		}
 		if info.IsDir() {
-			if err := sendDir(uploadURL, path); err != nil {
+			if err := sendDir(uploadURL, path, excludeDirs); err != nil {
 				return err
 			}
 		} else {
@@ -29,12 +29,19 @@ func SendFiles(uploadURL string, paths []string) error {
 	return nil
 }
 
-func sendDir(uploadURL, dir string) error {
+func sendDir(uploadURL, dir string, excludeDirs []string) error {
+	excluded := make(map[string]bool, len(excludeDirs))
+	for _, d := range excludeDirs {
+		excluded[d] = true
+	}
 	return filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if d.IsDir() {
+			if excluded[d.Name()] {
+				return filepath.SkipDir
+			}
 			return nil
 		}
 		rel, err := filepath.Rel(dir, path)
