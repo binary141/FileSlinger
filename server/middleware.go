@@ -6,18 +6,6 @@ import (
 	"time"
 )
 
-const tokenHeader = "X-Token"
-
-func tokenAuth(token string, next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get(tokenHeader) != token {
-			http.Error(w, "unauthorized", http.StatusUnauthorized)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-
 type responseRecorder struct {
 	http.ResponseWriter
 	status int

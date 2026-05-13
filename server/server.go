@@ -88,16 +88,16 @@ func Start(cfg Config) error {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/upload", uploadHandler(cfg.Dir, cfg.MaxFiles, &received, shutdown))
+	mux.HandleFunc("/upload/{token}", uploadHandler(cfg.Dir, cfg.Token, cfg.MaxFiles, &received, shutdown))
 	mux.HandleFunc("/ping", pingHandler)
-	srv.Handler = logging(tokenAuth(cfg.Token, mux))
+	srv.Handler = logging(mux)
 
 	limitMsg := "unlimited"
 	if cfg.MaxFiles > 0 {
 		limitMsg = fmt.Sprintf("limit %d", cfg.MaxFiles)
 	}
 	ip := privateIP()
-	url := fmt.Sprintf("http://%s:%d/upload?token=%s", ip, cfg.Port, cfg.Token)
+	url := fmt.Sprintf("http://%s:%d/upload/%s", ip, cfg.Port, cfg.Token)
 
 	qrterminal.GenerateHalfBlock(url, qrterminal.M, os.Stdout)
 

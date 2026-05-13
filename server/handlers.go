@@ -19,8 +19,12 @@ func pingHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func uploadHandler(dir string, maxFiles int, received *atomic.Int32, shutdown func()) http.HandlerFunc {
+func uploadHandler(dir, token string, maxFiles int, received *atomic.Int32, shutdown func()) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.PathValue("token") != token {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return

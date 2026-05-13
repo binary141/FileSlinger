@@ -10,18 +10,16 @@ import (
 	"path/filepath"
 )
 
-func SendFiles(host string, port int, token string, paths []string) error {
-	url := fmt.Sprintf("http://%s:%d/upload", host, port)
-
+func SendFiles(uploadURL string, paths []string) error {
 	for _, path := range paths {
-		if err := sendFile(url, token, path); err != nil {
+		if err := sendFile(uploadURL, path); err != nil {
 			return fmt.Errorf("%s: %w", filepath.Base(path), err)
 		}
 	}
 	return nil
 }
 
-func sendFile(url, token, path string) error {
+func sendFile(url, path string) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return err
@@ -58,7 +56,6 @@ func sendFile(url, token, path string) error {
 		return err
 	}
 	req.Header.Set("Content-Type", mw.FormDataContentType())
-	req.Header.Set("X-Token", token)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -68,7 +65,7 @@ func sendFile(url, token, path string) error {
 		_ = resp.Body.Close()
 	}()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("server returned %s: %s", resp.Status, bytes.TrimSpace(body))
 	}
