@@ -41,8 +41,13 @@ func StartRelay(cfg Config) error {
 
 	qrterminal.GenerateHalfBlock(uploadURL, qrterminal.M, os.Stdout)
 
+	limitMsg := "unlimited"
+	if cfg.MaxFiles > 0 {
+		limitMsg = fmt.Sprintf("limit %d", cfg.MaxFiles)
+	}
+
 	fmt.Printf("Relay: %s\n", uploadURL)
-	fmt.Printf("Dir:   %s\n", cfg.Dir)
+	fmt.Printf("Dir:   %s (%s)\n", cfg.Dir, limitMsg)
 
 	var received int
 	for {
